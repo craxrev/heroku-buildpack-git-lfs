@@ -29,6 +29,16 @@ if [[ -f "$env_dir/HEROKU_TEST_RUN_COMMIT_VERSION" ]]; then
     CI_SOURCE_VERSION="$(< "$env_dir/HEROKU_TEST_RUN_COMMIT_VERSION")"
 fi
 
+if [[ -f "$env_dir/BUILDPACK_GIT_LFS_SSH_PRIVATE_KEY" ]]; then
+    ssh_key="$(< "$env_dir/BUILDPACK_GIT_LFS_SSH_PRIVATE_KEY")"
+else
+    die "Env var BUILDPACK_GIT_LFS_SSH_PRIVATE_KEY is not set"
+fi
+
+git_user="${repo%@*}"
+git_host="${repo#*@}"
+git_host="${git_host%:*}"
+
 echo "-----> Install Git LFS"
 (
     pushd /tmp
@@ -42,6 +52,18 @@ echo "-----> Install Git LFS"
 echo "-----> Download Git LFS assets"
 (
     pushd "$build_dir"
+
+    mkdir -p /app/.ssh
+    chmod 700 /app/.ssh
+    echo "${ssh_key}" | base64 --decode > /app/.ssh/id_rsa
+
+    echo -e "Host ${git_host}\n"\
+          " User ${git_user}\n"\
+          " IdentityFile /app/.ssh/id_rsa\n"\
+          " IdentitiesOnly yes\n"\
+          " UserKnownHostsFile=/dev/null\n"\
+          " StrictHostKeyChecking no"\
+          > /app/.ssh/config
 
     mkdir -p .heroku/bin
     mv /tmp/git-lfs .heroku/bin/
