@@ -8,18 +8,17 @@ LFS][git-lfs] and downloads your Git LFS assets during deployment
 
 To configure Git LFS for your Heroku app called `<myapp>`, run:
 
-    $ heroku buildpacks:add                                          \
-        https://github.com/radian-software/heroku-buildpack-git-lfs  \
-        -a <myapp>
+    $ heroku buildpacks:add https://github.com/craxrev/heroku-buildpack-git-lfs -a <myapp>
 
 Set the following environment variable (i.e. using `heroku
 config:set`) for your app:
 
-* `BUILDPACK_GIT_LFS_REPO` to the clone URL of the repository from
-  which to download Git LFS assets. This should include any username,
-  password, or personal access token which is necessary to clone
-  noninteractively. See [here][noninteractive-clone] for details on
-  the syntax.
+* `BUILDPACK_GIT_LFS_REPO` to the clone URL of the repository
+  from which to download Git LFS assets. This should include any
+  username, password, or personal access token which is necessary to
+  clone noninteractively. See [here][noninteractive-clone] for
+  details on the syntax. It must be something like `git@github.com:username/my-repo`
+* `BUILDPACK_GIT_LFS_SSH_PRIVATE_KEY`: your private key encoded in base64 with `base64`. You can use `heroku config:set --app <myapp> "BUILDPACK_GIT_LFS_SSH_PRIVATE_KEY=$(cat ~/.ssh/heroku_deploy_lfs | base64 -w 0)"` to set it.
 
 After the next time you deploy your app, Git LFS assets will be
 downloaded and checked out automatically, and Git LFS will be
